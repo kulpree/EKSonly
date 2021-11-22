@@ -40,23 +40,24 @@ resource "aws_internet_gateway" "igw" {
 resource "aws_subnet" "consul_subnet1" {
   vpc_id            = aws_vpc.nia_vpc.id
   cidr_block        = var.consul_cidr_block1
-   availability_zone = data.aws_availability_zones.available.names[0]
-
+  availability_zone = data.aws_availability_zones.available.names[0]
+  map_public_ip_on_launch = true #now required as of 04-2020 for EKS Nodes
   tags = local.common_tags
 }
 #Creates a consul subnet in the VPC
 resource "aws_subnet" "consul_subnet2" {
   vpc_id            = aws_vpc.nia_vpc.id
   cidr_block        = var.consul_cidr_block2
-   availability_zone = data.aws_availability_zones.available.names[1]
-
+  availability_zone = data.aws_availability_zones.available.names[1]
+  map_public_ip_on_launch = true
   tags = local.common_tags
 }
 #Creates a consul subnet in the VPC
 resource "aws_subnet" "consul_subnet3" {
   vpc_id            = aws_vpc.nia_vpc.id
   cidr_block        = var.consul_cidr_block3
-   availability_zone = data.aws_availability_zones.available.names[2]
+  availability_zone = data.aws_availability_zones.available.names[2]
+  map_public_ip_on_launch = true
 
   tags = local.common_tags
 }
