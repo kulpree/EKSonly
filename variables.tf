@@ -12,4 +12,4 @@
   variable "key_name" {}
 
   #variable "ami" {}
-  variable "instance_type_agents" {}
+  #variable "instance_type_agents" {}
