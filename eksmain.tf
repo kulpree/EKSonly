@@ -275,6 +275,12 @@ resource "aws_eks_node_group" "reinvent" {
     aws_iam_role_policy_attachment.reinvent_node-AmazonEKS_CNI_Policy,
     aws_iam_role_policy_attachment.reinvent_node-AmazonEC2ContainerRegistryReadOnly,
   ]
+  tags = merge (
+    local.common_tags,
+    {
+      Env = "consul-${random_string.env.result}"  
+    },
+  )
 }
 
 
@@ -306,4 +312,14 @@ resource "aws_iam_role_policy_attachment" "reinvent_node-AmazonEKS_CNI_Policy" {
 resource "aws_iam_role_policy_attachment" "reinvent_node-AmazonEC2ContainerRegistryReadOnly" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
   role       = aws_iam_role.reinvent_node.name
+}
+resource "random_string" "env" {
+  length  = 4
+  special = false
+  upper   = false
+  number  = false
+}
+
+output "env" {
+  value = random_string.env.result
 }
