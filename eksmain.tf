@@ -328,7 +328,7 @@ output "env" {
   value = random_string.env.result
 }
 
-resource "aws_launch_template" "your_eks_launch_template" {
+resource "aws_launch_template" "reinvent-launch-template" {
   name = "reinvent-launch-template"
   tag_specifications {
     resource_type = "instance"
