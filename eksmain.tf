@@ -276,7 +276,7 @@ resource "aws_eks_node_group" "reinvent" {
     aws_iam_role_policy_attachment.reinvent_node-AmazonEC2ContainerRegistryReadOnly,
   ]
   tags = merge (
-    local.common_tags,
+    #local.common_tags,
     {
       Env = "consul-${random_string.env.result}"  
     },
