@@ -281,6 +281,10 @@ resource "aws_eks_node_group" "reinvent" {
       Env = "consul-${random_string.env.result}"  
     },
   )
+  launch_template {
+   name = aws_launch_template.your_eks_launch_template.name
+   version = aws_launch_template.reinvent-launch-template.latest_version
+  }
 }
 
 
@@ -322,4 +326,14 @@ resource "random_string" "env" {
 
 output "env" {
   value = random_string.env.result
+}
+
+resource "aws_launch_template" "your_eks_launch_template" {
+  name = "reinvent-launch-template"
+  tag_specifications {
+    resource_type = "instance"
+    tags = {
+       Env = "consul-${random_string.env.result}"  
+    }
+  }
 }
