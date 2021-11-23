@@ -282,7 +282,7 @@ resource "aws_eks_node_group" "reinvent" {
     },
   )
   launch_template {
-   name = aws_launch_template.your_eks_launch_template.name
+   name = aws_launch_template.reinvent-launch-template.name
    version = aws_launch_template.reinvent-launch-template.latest_version
   }
 }
