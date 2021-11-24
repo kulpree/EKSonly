@@ -35,6 +35,15 @@ output "address" {
           "sudo service nginx start",
         ]
     }
+      # The connection block tells our provisioner how to
+    # communicate with the resource (instance)
+    connection {
+      # The default username for our AMI
+      user = "ubuntu"
+  
+      # The connection will use the local SSH agent for authentication.
+    }
+  
   }
   
   data "aws_ami" "ubuntu" {
