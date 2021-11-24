@@ -56,30 +56,30 @@ output "address" {
 
 
 resource "aws_iam_instance_profile" "consul" {
-    name = "consul-${random_string.env.result}"
-    role = aws_iam_role.consul.name
-  }
-  
-  resource "aws_iam_role" "consul" {
-    name = "consul-${random_string.env.result}" 
-  
-    assume_role_policy = <<EOF
-  {
-    "Version": "2012-10-17",
-    "Statement": [
-      {
-        "Action": "sts:AssumeRole",
-        "Principal": {
-          "Service": "ec2.amazonaws.com"
-        },
-        "Effect": "Allow",
-        "Sid": ""
-      }
-    ]
-  }
-  EOF
-  }
-  
+  name = "consul-${random_string.env.result}"
+  role = aws_iam_role.consul.name
+}
+
+resource "aws_iam_role" "consul" {
+  name = "consul-${random_string.env.result}" 
+
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": "sts:AssumeRole",
+      "Principal": {
+        "Service": "ec2.amazonaws.com"
+      },
+      "Effect": "Allow",
+      "Sid": ""
+    }
+  ]
+}
+EOF
+}
+
 resource "aws_iam_policy" "consul" {
   name = "consul-${random_string.env.result}"
 
@@ -97,17 +97,16 @@ resource "aws_iam_policy" "consul" {
 EOF
 }
 
-  resource "aws_iam_role_policy_attachment" "consul" {
-    role       = aws_iam_role.consul.name
-    policy_arn = aws_iam_policy.consul.arn
-  }
-  
-  output "aws_consul_iam_role_arn" {
-    value = aws_iam_role.consul.arn
-  }
-  
-  output "aws_consul_iam_instance_profile_name" {
-    value = aws_iam_instance_profile.consul.name
-  }
-  
-  
+resource "aws_iam_role_policy_attachment" "consul" {
+  role       = aws_iam_role.consul.name
+  policy_arn = aws_iam_policy.consul.arn
+}
+
+output "aws_consul_iam_role_arn" {
+  value = aws_iam_role.consul.arn
+}
+
+output "aws_consul_iam_instance_profile_name" {
+  value = aws_iam_instance_profile.consul.name
+}
+
