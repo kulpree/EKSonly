@@ -6,7 +6,7 @@ output "address" {
     name = "terraform-example-elb"
   
     subnets         = ["${aws_subnet.service_subnet.id}"]
-    security_groups = ["${aws_security_group.allow_all_ssh.id}"]
+    security_groups = ["${aws_security_group.reinvent_sg.id}"]
     instances       = ["${aws_instance.consul_client.id}"]
   
     listener {
@@ -21,7 +21,7 @@ output "address" {
     ami = data.aws_ami.ubuntu.id
     instance_type = var.instance_type
     key_name = var.key_name
-    vpc_security_group_ids = [aws_security_group.allow_all_ssh.id]
+    vpc_security_group_ids = [aws_security_group.reinvent_sg.id]
     iam_instance_profile   = aws_iam_instance_profile.consul.name
     subnet_id = aws_subnet.service_subnet.id
     associate_public_ip_address = true
@@ -80,23 +80,23 @@ resource "aws_iam_instance_profile" "consul" {
   EOF
   }
   
-  resource "aws_iam_policy" "consul" {
-    name = "consul-${random_string.env.result}"
-  
-    policy = <<EOF
-  {
-    "Version": "2012-10-17",
-    "Statement": [
-      {
-        "Effect": "Allow",
-        "Action": "ec2:DescribeInstances",
-        "Resource": "*"
-      }
-    ]
-  }
-  EOF
-  }
-  
+resource "aws_iam_policy" "consul" {
+  name = "consul-${random_string.env.result}"
+
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": "ec2:DescribeInstances",
+      "Resource": "*"
+    }
+  ]
+}
+EOF
+}
+
   resource "aws_iam_role_policy_attachment" "consul" {
     role       = aws_iam_role.consul.name
     policy_arn = aws_iam_policy.consul.arn
