@@ -28,22 +28,6 @@ output "address" {
     #user_data = data.template_file.consul_client_init.rendered
     tags = local.common_tags
     depends_on = [aws_internet_gateway.igw]
-    provisioner "remote-exec" {
-        inline = [
-          "sudo apt-get -y update",
-          "sudo apt-get -y install nginx",
-          "sudo service nginx start",
-        ]
-    }
-      # The connection block tells our provisioner how to
-    # communicate with the resource (instance)
-    connection {
-      # The default username for our AMI
-      user = "ubuntu"
-  
-      # The connection will use the local SSH agent for authentication.
-    }
-  
   }
   
   data "aws_ami" "ubuntu" {
