@@ -2,6 +2,7 @@ output "address" {
     value = "${aws_elb.web.dns_name}"
   }
 
+/*
   resource "aws_elb" "web" {
     name = "terraform-example-elb"
   
@@ -15,7 +16,7 @@ output "address" {
       lb_protocol       = "http"
     }
   }
-  
+  */
   resource "aws_instance" "consul_client" {
     ami = data.aws_ami.ubuntu.id
     instance_type = var.instance_type
