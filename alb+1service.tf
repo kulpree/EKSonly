@@ -1,8 +1,8 @@
-output "address" {
+/*output "address" {
     value = "${aws_elb.web.dns_name}"
   }
 
-/*
+
   resource "aws_elb" "web" {
     name = "terraform-example-elb"
   
