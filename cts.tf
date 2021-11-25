@@ -8,4 +8,9 @@
     tags = local.common_tags
     depends_on = [aws_internet_gateway.igw]
   }
-  
+   
+
+output "cts-id" {
+    value = "${aws_instance.cts.id}"
+  }
+
