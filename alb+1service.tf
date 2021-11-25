@@ -7,7 +7,7 @@ output "address" {
   
     subnets         = ["${aws_subnet.service_subnet.id}"]
     security_groups = ["${aws_security_group.reinvent_sg.id}"]
-    instances       = ["${aws_instance.consul_client.id}"]
+    #instances       = ["${aws_instance.consul_client.id}"]
   
     listener {
       instance_port     = 80
