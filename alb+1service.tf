@@ -1,4 +1,4 @@
-/*output "address" {
+output "address" {
     value = "${aws_elb.web.dns_name}"
   }
 
@@ -16,7 +16,6 @@
       lb_protocol       = "http"
     }
   }
-  */
   resource "aws_instance" "consul_client" {
     ami = data.aws_ami.ubuntu.id
     instance_type = var.instance_type
