@@ -9,7 +9,7 @@
     local.common_tags,
     {
       Name = "cts-hari"
-    },
+    }
     depends_on = [aws_internet_gateway.igw]
   }
    

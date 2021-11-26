@@ -35,7 +35,7 @@ output "consul_client2" {
     local.common_tags,
     {
       Name = "nginx-hari"
-    },
+    }
     depends_on = [aws_internet_gateway.igw]
   }
 
@@ -52,7 +52,7 @@ output "consul_client2" {
     local.common_tags,
     {
       Name = "nginx2-hari"
-    },
+    }
   )
     depends_on = [aws_internet_gateway.igw]
   }
