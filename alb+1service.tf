@@ -8,6 +8,12 @@ output "consul_client2" {
     value = "${aws_instance.consul_client2.public_ip}"
   }
 
+output "consul_client_id" {
+    value = "${aws_instance.consul_client2.id}"
+  }
+output "consul_client2_id" {
+    value = "${aws_instance.consul_client2.id}"
+  }
 
   resource "aws_elb" "web" {
     name = "terraform-example-elb"
