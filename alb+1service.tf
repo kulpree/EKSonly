@@ -31,7 +31,11 @@ output "consul_client2" {
     subnet_id = aws_subnet.service_subnet.id
     associate_public_ip_address = true
     #user_data = data.template_file.consul_client_init.rendered
-    tags = local.common_tags
+          tags = merge (
+    local.common_tags,
+    {
+      Name = "nginx-hari"
+    },
     depends_on = [aws_internet_gateway.igw]
   }
 
@@ -44,7 +48,12 @@ output "consul_client2" {
     subnet_id = aws_subnet.service_subnet.id
     associate_public_ip_address = true
     #user_data = data.template_file.consul_client_init.rendered
-    tags = local.common_tags
+      tags = merge (
+    local.common_tags,
+    {
+      Name = "nginx2-hari"
+    },
+  )
     depends_on = [aws_internet_gateway.igw]
   }
   

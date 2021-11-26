@@ -5,7 +5,11 @@
     vpc_security_group_ids = [aws_security_group.reinvent_sg.id]
     subnet_id = aws_subnet.cts_subnet.id
     associate_public_ip_address = true
-    tags = local.common_tags
+    tags = merge (
+    local.common_tags,
+    {
+      Name = "cts-hari"
+    },
     depends_on = [aws_internet_gateway.igw]
   }
    
