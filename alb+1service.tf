@@ -1,6 +1,12 @@
 output "address" {
     value = "${aws_elb.web.dns_name}"
   }
+output "consul_client" {
+    value = "${aws_instance.consul_client.public_ip}"
+  }
+output "consul_client2" {
+    value = "${aws_instance.consul_client2.public_ip}"
+  }
 
 
   resource "aws_elb" "web" {
@@ -28,6 +34,20 @@ output "address" {
     tags = local.common_tags
     depends_on = [aws_internet_gateway.igw]
   }
+
+    resource "aws_instance" "consul_client2" {
+    ami = data.aws_ami.ubuntu.id
+    instance_type = var.instance_type
+    key_name = var.key_name
+    vpc_security_group_ids = [aws_security_group.reinvent_sg.id]
+    iam_instance_profile   = aws_iam_instance_profile.consul.name
+    subnet_id = aws_subnet.service_subnet.id
+    associate_public_ip_address = true
+    #user_data = data.template_file.consul_client_init.rendered
+    tags = local.common_tags
+    depends_on = [aws_internet_gateway.igw]
+  }
+  
   
   data "aws_ami" "ubuntu" {
     owners = ["self"]
