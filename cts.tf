@@ -18,3 +18,6 @@ output "cts-id" {
     value = "${aws_instance.cts.id}"
   }
 
+output "cts-publicip" {
+    value = "${aws_instance.cts.public_ip}"
+  }
