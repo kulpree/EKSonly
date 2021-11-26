@@ -9,7 +9,7 @@ output "consul_client2" {
   }
 
 output "consul_client_id" {
-    value = "${aws_instance.consul_client2.id}"
+    value = "${aws_instance.consul_client.id}"
   }
 output "consul_client2_id" {
     value = "${aws_instance.consul_client2.id}"
