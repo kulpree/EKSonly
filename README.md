@@ -1,3 +1,5 @@
+AFTER RUNNING THE TF MODULES 
+
 #1 - use eks_authorize file to get eks creds 
 2 - install consul on EKS - 
     helm install AWS hashicorp/consul -f eks.yaml --timeout 10m --version "0.32.1" (basic YAML config would do - this is a server only infra) 
