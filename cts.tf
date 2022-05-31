@@ -11,6 +11,7 @@
       Name = "cts-hari"
     },
     )
+    iam_instance_profile = aws_iam_instance_profile.cts.name
     depends_on = [aws_internet_gateway.igw]
   }
    
