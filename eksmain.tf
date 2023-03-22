@@ -108,7 +108,7 @@ resource "aws_route_table_association" "consul_publicassociation3" {
   route_table_id = aws_route_table.publicrt.id
 }
 #Associates the cts subnet with the public RT 
-resource "aws_route_table_association" "cts_publicassociation" {
+/*resource "aws_route_table_association" "cts_publicassociation" {
   subnet_id      = aws_subnet.cts_subnet.id
   route_table_id = aws_route_table.publicrt.id
 }
@@ -117,7 +117,7 @@ resource "aws_route_table_association" "service_publicassociation" {
   subnet_id      = aws_subnet.service_subnet.id
   route_table_id = aws_route_table.publicrt.id
 }
-
+*/
 #Creates a security group that only allows SSH inbound from anywhere, while allowing all traffic outbound
 resource "aws_security_group" "reinvent_sg" {
   name        = "reinvent_sg"
