@@ -62,7 +62,7 @@ resource "aws_subnet" "consul_subnet3" {
   tags = local.common_tags
 }
 #Creates a cts subnet in the VPC
-resource "aws_subnet" "cts_subnet" {
+/*resource "aws_subnet" "cts_subnet" {
   vpc_id            = aws_vpc.nia_vpc.id
   cidr_block        = var.cts_cidr_block
   availability_zone = data.aws_availability_zones.available.names[0]
@@ -78,7 +78,7 @@ resource "aws_subnet" "service_subnet" {
 
   tags = local.common_tags
 }
-
+*/
 #Creates a public RT 
 resource "aws_route_table" "publicrt" {
   vpc_id = aws_vpc.nia_vpc.id
