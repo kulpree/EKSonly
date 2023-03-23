@@ -338,6 +338,10 @@ resource "aws_launch_template" "reinvent-launch-template" {
   }
 }
 
+data "aws_eks_cluster" "reinvent" {
+  name = aws_eks_cluster.reinvent.name
+}
+
 data "aws_iam_policy" "ebs_csi_policy" {
   arn = "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
 }
