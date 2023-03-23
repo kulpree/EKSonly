@@ -360,7 +360,7 @@ module "irsa-ebs-csi" {
 resource "aws_eks_addon" "reinvent" {
   cluster_name             = aws_eks_cluster.reinvent.name
   addon_name               = "aws-ebs-csi-driver"
-  addon_version            = "v1.5.2-eksbuild.1"
+  addon_version            = "v1.17.0-eksbuild.1"
   service_account_role_arn = module.irsa-ebs-csi.iam_role_arn
   tags = {
     "eks_addon" = "ebs-csi"
