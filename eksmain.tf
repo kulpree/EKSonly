@@ -88,10 +88,10 @@ resource "aws_route_table" "publicrt" {
     gateway_id = aws_internet_gateway.igw.id
   }
   #adding an extra route for vpc peering
-  route {
-    cidr_block = "10.69.0.0/16"
-    vpc_peering_connection_id = "pcx-0bcf0f9cccca03f28" # typically this should be part of the same code for client side and use VPC ID from a module
-  }
+  #route {
+   # cidr_block = "10.69.0.0/16"
+    #vpc_peering_connection_id = "pcx-0bcf0f9cccca03f28" # typically this should be part of the same code for client side and use VPC ID from a module
+  #}
   tags = merge (
     local.common_tags,
     {
