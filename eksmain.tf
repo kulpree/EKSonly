@@ -373,8 +373,10 @@ resource "aws_eks_addon" "reinvent" {
   }
 }
 
-
+/*
+#only use where consul already exists
 module "hcp-consul_k8s-demo-app" {
   source  = "hashicorp/hcp-consul/aws//modules/k8s-demo-app"
   version = "0.12.1"
 }
+*/
