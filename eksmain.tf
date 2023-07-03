@@ -154,7 +154,7 @@ resource "aws_security_group" "nEKS_sg" {
 #7 - ################################################EKS_Cluster#######################
 
 resource "aws_eks_cluster" "nEKS" {
-  name     = "nEKS ${count.index}"
+  name     = "nEKS${count.index}"
   role_arn = aws_iam_role.nEKS.arn
   count = var.eks_total
   vpc_config {
