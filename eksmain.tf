@@ -325,7 +325,7 @@ resource "aws_eks_addon" "nEKS" {
   cluster_name             = aws_eks_cluster.nEKS[count.index].name
   addon_name               = "aws-ebs-csi-driver"
   addon_version            = "v1.17.0-eksbuild.1"
-  service_account_role_arn = module.irsa-ebs-csi.iam_role_arn
+  service_account_role_arn = module.irsa-ebs-csi.iam_role_arn[count.index]
   tags = {
     "eks_addon" = "ebs-csi"
     "terraform" = "true"
