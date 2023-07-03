@@ -321,6 +321,7 @@ module "irsa-ebs-csi" {
 #14 - CSI Addon - 
 
 resource "aws_eks_addon" "nEKS" {
+  count = var.eks_total
   cluster_name             = aws_eks_cluster.nEKS[count.index].name
   addon_name               = "aws-ebs-csi-driver"
   addon_version            = "v1.17.0-eksbuild.1"
@@ -342,11 +343,11 @@ module "hcp-consul_k8s-demo-app" {
 
 
 output "endpoint" {
-  value = aws_eks_cluster.nEKS[count.index].endpoint
+  value = one(aws_eks_cluster.nEKS[*].endpoint)
 }
 
 output "kubeconfig-certificate-authority-data" {
-  value = aws_eks_cluster.nEKS[count.index].certificate_authority[0].data
+  value = one(aws_eks_cluster.nEKS[*].certificate_authority[0].data)
 }
 
 output "env" {
