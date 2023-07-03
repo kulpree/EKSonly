@@ -296,6 +296,7 @@ resource "aws_launch_template" "nEKS-launch-template" {
 #12 - Data items 
 
 data "aws_eks_cluster" "nEKS" {
+  count = var.eks_total
   name = aws_eks_cluster.nEKS[0].name
 }
 
