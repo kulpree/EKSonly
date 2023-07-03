@@ -4,4 +4,4 @@
   variable "consul_cidr_block1" {}
   variable "consul_cidr_block2" {}
   variable "consul_cidr_block3" {}
-  varibale "count" {}
+  variable "count" {}
