@@ -14,7 +14,7 @@ resource "aws_vpc" "eks_vpc" {
 resource "aws_internet_gateway" "igw" {
   vpc_id = aws_vpc.eks_vpc.id
 
-  tags = local.common_tags
+  tags = local.common_tags  
 
 }
 
@@ -76,8 +76,8 @@ resource "aws_route_table_association" "consul_publicassociation3" {
 
 #6 - Creates a security group that only allows SSH inbound from anywhere, while allowing all traffic outbound
 
-resource "aws_security_group" "reinvent_sg" {
-  name        = "reinvent_sg"
+resource "aws_security_group" "nEKS_sg" {
+  name        = "nEKS_sg"
   description = "Allow all consul traffic inbound"
   vpc_id      = aws_vpc.eks_vpc.id
 
@@ -151,34 +151,29 @@ resource "aws_security_group" "reinvent_sg" {
   tags = local.common_tags
 }
 
-################################################EKS_Cluster#######################
-resource "aws_eks_cluster" "reinvent" {
-  name     = "reinvent"
-  role_arn = aws_iam_role.reinvent.arn
+#7 - ################################################EKS_Cluster#######################
+
+resource "aws_eks_cluster" "nEKS" {
+  name     = "nEKS"
+  role_arn = aws_iam_role.nEKS.arn
   count = var.eks_total
   vpc_config {
-    security_group_ids = ["${aws_security_group.reinvent_sg.id}"]
+    security_group_ids = ["${aws_security_group.nEKS_sg.id}"]
     subnet_ids = [aws_subnet.consul_subnet1.id, aws_subnet.consul_subnet2.id, aws_subnet.consul_subnet3.id]
   }
 
   # Ensure that IAM Role permissions are created before and deleted after EKS Cluster handling.
   # Otherwise, EKS will not be able to properly delete EKS managed EC2 infrastructure such as Security Groups.
   depends_on = [
-    aws_iam_role_policy_attachment.reinvent-AmazonEKSClusterPolicy,
-    aws_iam_role_policy_attachment.reinvent-AmazonEKSVPCResourceController,
+    aws_iam_role_policy_attachment.nEKS-AmazonEKSClusterPolicy,
+    aws_iam_role_policy_attachment.nEKS-AmazonEKSVPCResourceController,
   ]
 }
 
-output "endpoint" {
-  value = aws_eks_cluster.reinvent.endpoint
-}
+#8 - IAM roles, policies, attachments. 
 
-output "kubeconfig-certificate-authority-data" {
-  value = aws_eks_cluster.reinvent.certificate_authority[0].data
-}
-
-resource "aws_iam_role" "reinvent" {
-  name = "eks-cluster-reinvent"
+resource "aws_iam_role" "nEKS" {
+  name = "eks-cluster-nEKS"
 
   assume_role_policy = <<POLICY
 {
@@ -196,23 +191,56 @@ resource "aws_iam_role" "reinvent" {
 POLICY
 }
 
-resource "aws_iam_role_policy_attachment" "reinvent-AmazonEKSClusterPolicy" {
+resource "aws_iam_role_policy_attachment" "nEKS-AmazonEKSClusterPolicy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
-  role       = aws_iam_role.reinvent.name
+  role       = aws_iam_role.nEKS.name
 }
 
 # Optionally, enable Security Groups for Pods
 # Reference: https://docs.aws.amazon.com/eks/latest/userguide/security-groups-for-pods.html
-resource "aws_iam_role_policy_attachment" "reinvent-AmazonEKSVPCResourceController" {
+resource "aws_iam_role_policy_attachment" "nEKS-AmazonEKSVPCResourceController" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSVPCResourceController"
-  role       = aws_iam_role.reinvent.name
+  role       = aws_iam_role.nEKS.name
 }
 
-#EKS_node_group
-resource "aws_eks_node_group" "reinvent" {
-  cluster_name    = aws_eks_cluster.reinvent.name
-  node_group_name = "reinvent_node_group"
-  node_role_arn   = aws_iam_role.reinvent_node.arn
+
+resource "aws_iam_role" "nEKS_node" {
+  name = "eks-node-group-nEKS"
+
+  assume_role_policy = jsonencode({
+    Statement = [{
+      Action = "sts:AssumeRole"
+      Effect = "Allow"
+      Principal = {
+        Service = "ec2.amazonaws.com"
+      }
+    }]
+    Version = "2012-10-17"
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "nEKS_node-AmazonEKSWorkerNodePolicy" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
+  role       = aws_iam_role.nEKS_node.name
+}
+
+resource "aws_iam_role_policy_attachment" "nEKS_node-AmazonEKS_CNI_Policy" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
+  role       = aws_iam_role.nEKS_node.name
+}
+
+resource "aws_iam_role_policy_attachment" "nEKS_node-AmazonEC2ContainerRegistryReadOnly" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+  role       = aws_iam_role.nEKS_node.name
+}
+
+
+#9 - EKS_node_group
+
+resource "aws_eks_node_group" "nEKS" {
+  cluster_name    = aws_eks_cluster.nEKS[0].name
+  node_group_name = "nEKS_node_group"
+  node_role_arn   = aws_iam_role.nEKS_node.arn
   subnet_ids      = [aws_subnet.consul_subnet1.id, aws_subnet.consul_subnet2.id, aws_subnet.consul_subnet3.id]
 
   scaling_config {
@@ -228,9 +256,9 @@ resource "aws_eks_node_group" "reinvent" {
   # Ensure that IAM Role permissions are created before and deleted after EKS Node Group handling.
   # Otherwise, EKS will not be able to properly delete EC2 Instances and Elastic Network Interfaces.
   depends_on = [
-    aws_iam_role_policy_attachment.reinvent_node-AmazonEKSWorkerNodePolicy,
-    aws_iam_role_policy_attachment.reinvent_node-AmazonEKS_CNI_Policy,
-    aws_iam_role_policy_attachment.reinvent_node-AmazonEC2ContainerRegistryReadOnly,
+    aws_iam_role_policy_attachment.nEKS_node-AmazonEKSWorkerNodePolicy,
+    aws_iam_role_policy_attachment.nEKS_node-AmazonEKS_CNI_Policy,
+    aws_iam_role_policy_attachment.nEKS_node-AmazonEC2ContainerRegistryReadOnly,
   ]
   tags = merge (
     #local.common_tags,
@@ -239,41 +267,12 @@ resource "aws_eks_node_group" "reinvent" {
     },
   )
   launch_template {
-   name = aws_launch_template.reinvent-launch-template.name
-   version = aws_launch_template.reinvent-launch-template.latest_version
+   name = aws_launch_template.nEKS-launch-template.name
+   version = aws_launch_template.nEKS-launch-template.latest_version
   }
 }
 
-
-resource "aws_iam_role" "reinvent_node" {
-  name = "eks-node-group-reinvent"
-
-  assume_role_policy = jsonencode({
-    Statement = [{
-      Action = "sts:AssumeRole"
-      Effect = "Allow"
-      Principal = {
-        Service = "ec2.amazonaws.com"
-      }
-    }]
-    Version = "2012-10-17"
-  })
-}
-
-resource "aws_iam_role_policy_attachment" "reinvent_node-AmazonEKSWorkerNodePolicy" {
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
-  role       = aws_iam_role.reinvent_node.name
-}
-
-resource "aws_iam_role_policy_attachment" "reinvent_node-AmazonEKS_CNI_Policy" {
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
-  role       = aws_iam_role.reinvent_node.name
-}
-
-resource "aws_iam_role_policy_attachment" "reinvent_node-AmazonEC2ContainerRegistryReadOnly" {
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
-  role       = aws_iam_role.reinvent_node.name
-}
+#10 - Random
 resource "random_string" "env" {
   length  = 4
   special = false
@@ -281,12 +280,11 @@ resource "random_string" "env" {
   number  = false
 }
 
-output "env" {
-  value = random_string.env.result
-}
 
-resource "aws_launch_template" "reinvent-launch-template" {
-  name = "reinvent-launch-template"
+#11 - launch-templates-EKS
+
+resource "aws_launch_template" "nEKS-launch-template" {
+  name = "nEKS-launch-template"
   tag_specifications {
     resource_type = "instance"
     tags = {
@@ -295,27 +293,33 @@ resource "aws_launch_template" "reinvent-launch-template" {
   }
 }
 
-data "aws_eks_cluster" "reinvent" {
-  name = aws_eks_cluster.reinvent.name
+#12 - Data items 
+
+data "aws_eks_cluster" "nEKS" {
+  name = aws_eks_cluster.nEKS[0].name
 }
 
 data "aws_iam_policy" "ebs_csi_policy" {
   arn = "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
 }
 
+#13 - CSI drivers 
+
 module "irsa-ebs-csi" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
   version = "4.7.0"
 
   create_role                   = true
-  role_name                     = "AmazonEKSTFEBSCSIRole-reinvent"
-  provider_url                  = replace(data.aws_eks_cluster.reinvent.identity.0.oidc.0.issuer, "https://", "")
+  role_name                     = "AmazonEKSTFEBSCSIRole-nEKS"
+  provider_url                  = replace(data.aws_eks_cluster.nEKS[0].identity.0.oidc.0.issuer, "https://", "")
   role_policy_arns              = [data.aws_iam_policy.ebs_csi_policy.arn]
   oidc_fully_qualified_subjects = ["system:serviceaccount:kube-system:ebs-csi-controller-sa"]
 }
 
-resource "aws_eks_addon" "reinvent" {
-  cluster_name             = aws_eks_cluster.reinvent.name
+#14 - CSI Addon - 
+
+resource "aws_eks_addon" "nEKS" {
+  cluster_name             = aws_eks_cluster.nEKS[0].name
   addon_name               = "aws-ebs-csi-driver"
   addon_version            = "v1.17.0-eksbuild.1"
   service_account_role_arn = module.irsa-ebs-csi.iam_role_arn
@@ -332,3 +336,18 @@ module "hcp-consul_k8s-demo-app" {
   version = "0.12.1"
 }
 */
+
+
+
+output "endpoint" {
+  value = aws_eks_cluster.nEKS[0].endpoint
+}
+
+output "kubeconfig-certificate-authority-data" {
+  value = aws_eks_cluster.nEKS[0].certificate_authority[0].data
+}
+
+output "env" {
+  value = random_string.env.result
+}
+
