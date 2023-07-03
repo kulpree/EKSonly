@@ -1,97 +1,57 @@
-# PREBUILT CONSUL AND ENVOY PACKER IMAGE 
-/*
-data "aws_ami" "ubuntu" {
-  owners = ["self"]
-
-  most_recent = true
-
-  filter {
-    name   = "name"
-    values = ["HRS1-*"]
-  }
-
-  filter {
-    name   = "virtualization-type"
-    values = ["hvm"]
-  }
-}
-*/
-# Declare the data source
+#0 - Declare the data source
 data "aws_availability_zones" "available" {
   state = "available"
 }
 
-#Creates a VPC with one primary CIDR range
-resource "aws_vpc" "nia_vpc" {
+#1 - Creates a VPC with one primary CIDR range
+resource "aws_vpc" "eks_vpc" {
   cidr_block = var.vpc_cidr_block 
   enable_dns_hostnames = true #required for eks, default is false 
   enable_dns_support = true #required for eks, default is true however
   tags = local.common_tags
 }
-#Creates an IGW and attaches it to the VPC
+#2 - Creates an IGW and attaches it to the VPC
 resource "aws_internet_gateway" "igw" {
-  vpc_id = aws_vpc.nia_vpc.id
+  vpc_id = aws_vpc.eks_vpc.id
 
   tags = local.common_tags
 
 }
 
-#Creates a consul subnet in the VPC
+#3a - Creates a consul subnet in the VPC
 resource "aws_subnet" "consul_subnet1" {
-  vpc_id            = aws_vpc.nia_vpc.id
+  vpc_id            = aws_vpc.eks_vpc.id
   cidr_block        = var.consul_cidr_block1
   availability_zone = data.aws_availability_zones.available.names[0]
   map_public_ip_on_launch = true #now required as of 04-2020 for EKS Nodes
   tags = local.common_tags
 }
-#Creates a consul subnet in the VPC
+#3b - Creates a consul subnet in the VPC
 resource "aws_subnet" "consul_subnet2" {
-  vpc_id            = aws_vpc.nia_vpc.id
+  vpc_id            = aws_vpc.eks_vpc.id
   cidr_block        = var.consul_cidr_block2
   availability_zone = data.aws_availability_zones.available.names[1]
   map_public_ip_on_launch = true
   tags = local.common_tags
 }
-#Creates a consul subnet in the VPC
+#3c - Creates a consul subnet in the VPC
 resource "aws_subnet" "consul_subnet3" {
-  vpc_id            = aws_vpc.nia_vpc.id
+  vpc_id            = aws_vpc.eks_vpc.id
   cidr_block        = var.consul_cidr_block3
   availability_zone = data.aws_availability_zones.available.names[2]
   map_public_ip_on_launch = true
 
   tags = local.common_tags
 }
-#Creates a cts subnet in the VPC
-/*resource "aws_subnet" "cts_subnet" {
-  vpc_id            = aws_vpc.nia_vpc.id
-  cidr_block        = var.cts_cidr_block
-  availability_zone = data.aws_availability_zones.available.names[0]
 
-  tags = local.common_tags
-}
-
-#Creates a service subnet in the VPC
-resource "aws_subnet" "service_subnet" {
-  vpc_id            = aws_vpc.nia_vpc.id
-  cidr_block        = var.service_cidr_block
-  availability_zone = data.aws_availability_zones.available.names[0]
-
-  tags = local.common_tags
-}
-*/
-#Creates a public RT 
+#4 - Creates a public RT 
 resource "aws_route_table" "publicrt" {
-  vpc_id = aws_vpc.nia_vpc.id
+  vpc_id = aws_vpc.eks_vpc.id
 
   route {
     cidr_block = "0.0.0.0/0"
     gateway_id = aws_internet_gateway.igw.id
   }
-  #adding an extra route for vpc peering
-  #route {
-   # cidr_block = "10.69.0.0/16"
-    #vpc_peering_connection_id = "pcx-0bcf0f9cccca03f28" # typically this should be part of the same code for client side and use VPC ID from a module
-  #}
   tags = merge (
     local.common_tags,
     {
@@ -99,7 +59,8 @@ resource "aws_route_table" "publicrt" {
     },
   )
 }
-#Associates the consul subnet with the public RT 
+
+#5 - Associates the consul subnet with the public RT 
 resource "aws_route_table_association" "consul_publicassociation1" {
   subnet_id      = aws_subnet.consul_subnet1.id
   route_table_id = aws_route_table.publicrt.id
@@ -112,22 +73,13 @@ resource "aws_route_table_association" "consul_publicassociation3" {
   subnet_id      = aws_subnet.consul_subnet3.id
   route_table_id = aws_route_table.publicrt.id
 }
-#Associates the cts subnet with the public RT 
-/*resource "aws_route_table_association" "cts_publicassociation" {
-  subnet_id      = aws_subnet.cts_subnet.id
-  route_table_id = aws_route_table.publicrt.id
-}
-#Associates the service subnet with the public RT 
-resource "aws_route_table_association" "service_publicassociation" {
-  subnet_id      = aws_subnet.service_subnet.id
-  route_table_id = aws_route_table.publicrt.id
-}
-*/
-#Creates a security group that only allows SSH inbound from anywhere, while allowing all traffic outbound
+
+#6 - Creates a security group that only allows SSH inbound from anywhere, while allowing all traffic outbound
+
 resource "aws_security_group" "reinvent_sg" {
   name        = "reinvent_sg"
   description = "Allow all consul traffic inbound"
-  vpc_id      = aws_vpc.nia_vpc.id
+  vpc_id      = aws_vpc.eks_vpc.id
 
   ingress {
     from_port   = 22
@@ -203,7 +155,7 @@ resource "aws_security_group" "reinvent_sg" {
 resource "aws_eks_cluster" "reinvent" {
   name     = "reinvent"
   role_arn = aws_iam_role.reinvent.arn
-
+  count = var.count
   vpc_config {
     security_group_ids = ["${aws_security_group.reinvent_sg.id}"]
     subnet_ids = [aws_subnet.consul_subnet1.id, aws_subnet.consul_subnet2.id, aws_subnet.consul_subnet3.id]

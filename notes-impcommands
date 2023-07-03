@@ -1,0 +1,11 @@
+1 - To get Consul bootstrap token and save into an ENV variable - 
+
+export CONSUL_HTTP_TOKEN=$(kubectl get --namespace consul secrets/consul-bootstrap-acl-token --template={{.data.token}} | base64 -d)
+
+
+2 - To get EKS config file into local directory -
+
+aws eks update-kubeconfig --region region-code --name my-cluster
+
+#where my-cluster is the name of the EKS clsuter that TF deploys. 
+

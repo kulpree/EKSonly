@@ -1,5 +1,5 @@
 locals {
-  # Common tags to be assigned to all resources
+  # Common tags that should be assigned to all resources that get deployed into AWS via Doormat. Change values as needed. 
   common_tags = {
     owner   = "hari"
     se-region = "EP"
