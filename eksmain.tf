@@ -155,7 +155,7 @@ resource "aws_security_group" "reinvent_sg" {
 resource "aws_eks_cluster" "reinvent" {
   name     = "reinvent"
   role_arn = aws_iam_role.reinvent.arn
-  count = var.count
+  count = var.eks_total
   vpc_config {
     security_group_ids = ["${aws_security_group.reinvent_sg.id}"]
     subnet_ids = [aws_subnet.consul_subnet1.id, aws_subnet.consul_subnet2.id, aws_subnet.consul_subnet3.id]
