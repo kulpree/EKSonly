@@ -278,7 +278,7 @@ resource "random_string" "env" {
   length  = 4
   special = false
   upper   = false
-  number  = false
+  numeric  = false
 }
 
 
@@ -310,7 +310,7 @@ data "aws_iam_policy" "ebs_csi_policy" {
 module "irsa-ebs-csi" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
   version = "4.7.0"
-
+  count = var.eks_total
   create_role                   = true
   role_name                     = "AmazonEKSTFEBSCSIRole-nEKS"
   provider_url                  = replace(data.aws_eks_cluster.nEKS[count.index].identity.0.oidc.0.issuer, "https://", "")
@@ -343,11 +343,11 @@ module "hcp-consul_k8s-demo-app" {
 
 
 output "endpoint" {
-  value = one(aws_eks_cluster.nEKS[*].endpoint)
+  value = aws_eks_cluster.nEKS[*].endpoint
 }
 
 output "kubeconfig-certificate-authority-data" {
-  value = one(aws_eks_cluster.nEKS[*].certificate_authority[0].data)
+  value = aws_eks_cluster.nEKS[*].certificate_authority[0].data
 }
 
 output "env" {
