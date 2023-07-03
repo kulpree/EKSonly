@@ -1,4 +1,4 @@
-#0 - Declare the data source
+#0 - Declare the AZ data source
 data "aws_availability_zones" "available" {
   state = "available"
 }
@@ -154,7 +154,7 @@ resource "aws_security_group" "nEKS_sg" {
 #7 - ################################################EKS_Cluster#######################
 
 resource "aws_eks_cluster" "nEKS" {
-  name     = "nEKS"
+  name     = "nEKS ${count.index}"
   role_arn = aws_iam_role.nEKS.arn
   count = var.eks_total
   vpc_config {
@@ -238,8 +238,9 @@ resource "aws_iam_role_policy_attachment" "nEKS_node-AmazonEC2ContainerRegistryR
 #9 - EKS_node_group
 
 resource "aws_eks_node_group" "nEKS" {
-  cluster_name    = aws_eks_cluster.nEKS[0].name
-  node_group_name = "nEKS_node_group"
+  count = var.eks_total
+  cluster_name    = aws_eks_cluster.nEKS[count.index].name
+  node_group_name = "nEKS_node_group ${count.index}"
   node_role_arn   = aws_iam_role.nEKS_node.arn
   subnet_ids      = [aws_subnet.consul_subnet1.id, aws_subnet.consul_subnet2.id, aws_subnet.consul_subnet3.id]
 
@@ -297,7 +298,7 @@ resource "aws_launch_template" "nEKS-launch-template" {
 
 data "aws_eks_cluster" "nEKS" {
   count = var.eks_total
-  name = aws_eks_cluster.nEKS[0].name
+  name = aws_eks_cluster.nEKS[count.index].name
 }
 
 data "aws_iam_policy" "ebs_csi_policy" {
@@ -312,7 +313,7 @@ module "irsa-ebs-csi" {
 
   create_role                   = true
   role_name                     = "AmazonEKSTFEBSCSIRole-nEKS"
-  provider_url                  = replace(data.aws_eks_cluster.nEKS[0].identity.0.oidc.0.issuer, "https://", "")
+  provider_url                  = replace(data.aws_eks_cluster.nEKS[count.index].identity.0.oidc.0.issuer, "https://", "")
   role_policy_arns              = [data.aws_iam_policy.ebs_csi_policy.arn]
   oidc_fully_qualified_subjects = ["system:serviceaccount:kube-system:ebs-csi-controller-sa"]
 }
@@ -320,7 +321,7 @@ module "irsa-ebs-csi" {
 #14 - CSI Addon - 
 
 resource "aws_eks_addon" "nEKS" {
-  cluster_name             = aws_eks_cluster.nEKS[0].name
+  cluster_name             = aws_eks_cluster.nEKS[count.index].name
   addon_name               = "aws-ebs-csi-driver"
   addon_version            = "v1.17.0-eksbuild.1"
   service_account_role_arn = module.irsa-ebs-csi.iam_role_arn
@@ -341,11 +342,11 @@ module "hcp-consul_k8s-demo-app" {
 
 
 output "endpoint" {
-  value = aws_eks_cluster.nEKS[0].endpoint
+  value = aws_eks_cluster.nEKS[count.index].endpoint
 }
 
 output "kubeconfig-certificate-authority-data" {
-  value = aws_eks_cluster.nEKS[0].certificate_authority[0].data
+  value = aws_eks_cluster.nEKS[count.index].certificate_authority[0].data
 }
 
 output "env" {
