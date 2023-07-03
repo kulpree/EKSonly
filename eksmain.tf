@@ -240,7 +240,7 @@ resource "aws_iam_role_policy_attachment" "nEKS_node-AmazonEC2ContainerRegistryR
 resource "aws_eks_node_group" "nEKS" {
   count = var.eks_total
   cluster_name    = aws_eks_cluster.nEKS[count.index].name
-  node_group_name = "nEKS_node_group ${count.index}"
+  node_group_name = "nEKS_node_group${count.index}"
   node_role_arn   = aws_iam_role.nEKS_node.arn
   subnet_ids      = [aws_subnet.consul_subnet1.id, aws_subnet.consul_subnet2.id, aws_subnet.consul_subnet3.id]
 
@@ -296,10 +296,10 @@ resource "aws_launch_template" "nEKS-launch-template" {
 
 #12 - Data items 
 
-data "aws_eks_cluster" "nEKS" {
-  count = var.eks_total
-  name = aws_eks_cluster.nEKS[count.index].name
-}
+#data "aws_eks_cluster" "nEKS" {
+ # count = var.eks_total
+  #name = aws_eks_cluster.nEKS[count.index].name
+#}
 
 data "aws_iam_policy" "ebs_csi_policy" {
   arn = "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
@@ -310,10 +310,10 @@ data "aws_iam_policy" "ebs_csi_policy" {
 module "irsa-ebs-csi" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
   version = "4.7.0"
-  count = var.eks_total
+  #count = var.eks_total
   create_role                   = true
   role_name                     = "AmazonEKSTFEBSCSIRole-nEKS"
-  provider_url                  = replace(data.aws_eks_cluster.nEKS[count.index].identity.0.oidc.0.issuer, "https://", "")
+  #provider_url                  = replace(data.aws_eks_cluster.nEKS[count.index].identity.0.oidc.0.issuer, "https://", "")
   role_policy_arns              = [data.aws_iam_policy.ebs_csi_policy.arn]
   oidc_fully_qualified_subjects = ["system:serviceaccount:kube-system:ebs-csi-controller-sa"]
 }
@@ -324,7 +324,7 @@ resource "aws_eks_addon" "nEKS" {
   count = var.eks_total
   cluster_name             = aws_eks_cluster.nEKS[count.index].name
   addon_name               = "aws-ebs-csi-driver"
-  addon_version            = "v1.17.0-eksbuild.1"
+  addon_version            = "v1.20.0-eksbuild.1"
   service_account_role_arn = module.irsa-ebs-csi[count.index].iam_role_arn
   tags = {
     "eks_addon" = "ebs-csi"
