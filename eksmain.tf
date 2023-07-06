@@ -297,8 +297,8 @@ resource "aws_launch_template" "nEKS-launch-template" {
 #12 - Data items 
 
 data "aws_eks_cluster" "nEKS" {
-  #count = var.eks_total
-  name = aws_eks_cluster.nEKS[0].name
+  count = var.eks_total
+  name = aws_eks_cluster.nEKS[count.index].name
 }
 
 data "aws_iam_policy" "ebs_csi_policy" {
@@ -310,10 +310,11 @@ data "aws_iam_policy" "ebs_csi_policy" {
 module "irsa-ebs-csi" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
   version = "4.7.0"
-  #count = var.eks_total
+  count = var.eks_total
   create_role                   = true
   role_name                     = "AmazonEKSTFEBSCSIRole-nEKS"
-  provider_url                  = replace(data.aws_eks_cluster.nEKS.identity.0.oidc.0.issuer, "https://", "")
+  #provider_url                  = replace(data.aws_eks_cluster.nEKS.identity.0.oidc.0.issuer, "https://", "")
+  provider_urls                  = replace(data.aws_eks_cluster.nEKS[count.index].identity.0.oidc.0.issuer, "https://", "")
   role_policy_arns              = [data.aws_iam_policy.ebs_csi_policy.arn]
   oidc_fully_qualified_subjects = ["system:serviceaccount:kube-system:ebs-csi-controller-sa"]
 }
