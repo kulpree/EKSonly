@@ -314,7 +314,7 @@ module "irsa-ebs-csi" {
   create_role                   = true
   role_name                     = "AmazonEKSTFEBSCSIRole-nEKS"
   #provider_url                  = replace(data.aws_eks_cluster.nEKS.identity.0.oidc.0.issuer, "https://", "")
-  provider_urls                  = replace(data.aws_eks_cluster.nEKS[count.index].identity.0.oidc.0.issuer, "https://", "")
+  provider_urls                  = [replace(data.aws_eks_cluster.nEKS[count.index].identity.0.oidc.0.issuer, "https://", "")]
   role_policy_arns              = [data.aws_iam_policy.ebs_csi_policy.arn]
   oidc_fully_qualified_subjects = ["system:serviceaccount:kube-system:ebs-csi-controller-sa"]
 }
