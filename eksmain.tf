@@ -312,7 +312,8 @@ module "irsa-ebs-csi" {
   version = "4.7.0"
   count = var.eks_total
   create_role                   = true
-  role_name                     = "AmazonEKSTFEBSCSIRole-nEKS"
+  #role_name                     = "AmazonEKSTFEBSCSIRole-nEKS"
+  role_name                     = aws_eks_cluster.nEKS[count.index].name
   #provider_url                  = replace(data.aws_eks_cluster.nEKS.identity.0.oidc.0.issuer, "https://", "")
   provider_urls                  = [replace(data.aws_eks_cluster.nEKS[count.index].identity.0.oidc.0.issuer, "https://", "")]
   role_policy_arns              = [data.aws_iam_policy.ebs_csi_policy.arn]
