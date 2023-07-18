@@ -305,6 +305,12 @@ data "aws_iam_policy" "ebs_csi_policy" {
   arn = "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
 }
 
+
+data "tls_certificate" "nEKS" {
+ count = var.eks_total
+ url = aws_eks_cluster.nEKS[count.index].identity.0.oidc.0.issuer
+}
+
 #13 - CSI drivers 
 
 module "irsa-ebs-csi" {
@@ -334,6 +340,16 @@ resource "aws_eks_addon" "nEKS" {
   }
 }
 
+#15 - Apply the OIDC provider for the cluster
+
+resource "aws_iam_openid_connect_provider" "nEKS" {
+  count = var.eks_total
+  client_id_list  = ["sts.amazonaws.com"]
+  thumbprint_list = [data.tls_certificate.nEKS[count.index].certificates[0].sha1_fingerprint]
+  url             = "aws_eks_cluster.nEKS[count.index].identity.0.oidc.0.issuer"
+}
+
+
 /*
 #only use where consul already exists
 module "hcp-consul_k8s-demo-app" {
@@ -341,7 +357,6 @@ module "hcp-consul_k8s-demo-app" {
   version = "0.12.1"
 }
 */
-
 
 
 output "endpoint" {
