@@ -309,7 +309,7 @@ data "aws_iam_policy" "ebs_csi_policy" {
 
 module "irsa-ebs-csi" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
-  version = "5.27.0"
+  version = "4.7.0"
   count = var.eks_total
   create_role                   = true
   #role_name                     = "AmazonEKSTFEBSCSIRole-nEKS"
