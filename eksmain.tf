@@ -346,7 +346,7 @@ resource "aws_iam_openid_connect_provider" "nEKS" {
   count = var.eks_total
   client_id_list  = ["sts.amazonaws.com"]
   thumbprint_list = [data.tls_certificate.nEKS[count.index].certificates[0].sha1_fingerprint]
-  url             = "aws_eks_cluster.nEKS[count.index].identity.0.oidc.0.issuer"
+  url             = ["aws_eks_cluster.nEKS[count.index].identity.0.oidc.0.issuer"]
 }
 
 
