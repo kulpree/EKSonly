@@ -4,6 +4,7 @@ This module is for deploying 1 or more EKS clusters automtically using count
 # Note: There are two optional modules - 
 
 1 - One is to install Consul on the EKS cluster 
+
 2 - And another to deploy Hashicups and register it with Consul SM.
 
 # Pre-reqs: 
