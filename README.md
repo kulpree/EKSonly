@@ -1,32 +1,21 @@
-AFTER RUNNING THE TF MODULES 
+# Repeated EKS automated deployment - This module is for deploying 1 or more EKS clusters automtically using count
+# There are two optional modules referred to herewithin - one is to install Consul on the EKS cluster and another to deploy Hashicups and register it with Consul SM.
 
-#1 - use eks_authorize file to get eks creds 
-2 - install consul on EKS - 
-    helm install AWS hashicorp/consul -f eks.yaml --timeout 10m --version "0.32.1" (basic YAML config would do - this is a server only infra) 
-    
-3 - install CTS first 
-  Follow Learn docs 
+# Pre-reqs 
 
-4 - If using acl tokens, configure that appropriately for CTS as well as all the clients. 
+1 - AWS account with admin access (doormat accounts do work) 
+2 - Check Provider.tf for AWS provider requirements. 
+3 - TF version used - 1.5.3 
+4 - EKS version used - Latest by default, although version could be hardcoded in the aws_eks_cluster module. 
 
-4 - For TLS, install tls certs for CTS, and all clients (NGINX)
-  FOllow learn docs
+# Warnings - The security related resources inside this module may not be production grade, please review and update as needed if using in Production. 
 
-5 - Install nginx servers on both client machines. 
+# To use the module 
 
-6 - Grab tokens for correct tfcb workspace (or use local TF and provide appropraite permissions) 
+1 - Check tfvars files for all the variables, the count variable is the most important as this dictates how many EKS clusters and its associated components will be deployed. 
+2 - Locals.tf files has some common tags, update as necessary. 
+3 - Once deployed, use the command in 'notes-impcommands' to pull the eks creds into your local kube config. 
 
-7 - make sure right security groups are applied. 
-
-
-
-----
-
-
-
-# Consul 1.16 - Envoy extensions - Property Override
-
-# Pre-reqs
 
 1 - Atleast one kubernetes Cluster. 
   
@@ -49,7 +38,9 @@ AFTER RUNNING THE TF MODULES
 
   To request a 30 day trial license: https://www.hashicorp.com/products/consul/trial
 
-# Deploy Consul on Kubernetes cluster
+# To verify if your EKS deployment is good, you may optionally use the module below to install Consul and confirm. Deploy Consul on Kubernetes cluster
+
+# OPTIONAL: Deploy Consul on Kubernetes cluster (These optional modules may have additional pre-reqs, warnings, please refer to that module's readme for further info)
 
 1. Clone this repo
 ```
@@ -81,7 +72,7 @@ kubectl create secret generic license --from-literal=key=$CONSUL_LICENSE
   To install consul - 
 
   ```
-  consul-k8s install --config-file 1.16-servers.yaml -set chart.version=1.2.0-rc1
+  consul-k8s install --config-file 1.16-servers.yaml -set chart.version=1.2.0
   ```
   Note - Whether you use consul-k8s or helm, it is always a good practise to set the chart version, especially when working with RC or dev releases.  
   Note - documentation on how to install a specific consul-k8s version of cli (brew may not work in some cases) - 
@@ -147,7 +138,7 @@ kubectl create secret generic license --from-literal=key=$CONSUL_LICENSE
   You should be able to login to your UI with this boostrap token to view everything. Now time to set up a few services for our service mesh deployment. 
 
 
-# Deploy Hashicups and register it with Consul on Kubernetes
+# OPTIONAL: Deploy Hashicups and register it with Consul on Kubernetes (These optional modules may have additional pre-reqs, warnings, please refer to that module's readme for further info)
 
   Any demo application with atleast one upstream/downstream pair will do but we use the hashicups application here to showcase the different options that are possible with propertyoverride and other envoy extensions
 
@@ -205,49 +196,4 @@ kubectl create secret generic license --from-literal=key=$CONSUL_LICENSE
 
   ```
 
-
-# Configure Property override 
-
-  This repo is not meant to explain everyhing about property override on how it works or why we have this feature. For that please refer to our official documentation here - https://developer.hashicorp.com/consul/docs/connect/proxies/envoy-extensions/usage/property-override
-
-  Or talk to a Hashicorp SE 
-
-
-  That said, here is one of the (easiest and clear) way to see the effects of this extention. 
-
-  1 - Firstly port-forward the Envoy admin interface your service of choice to which you will be making changes. In this case it is the public-API (it has both upstreams as well as downstreams, and multiple of them) and then login to your browser. Like this - 
-
-  ```
-  kubectl port-forward public-api-79f78675f6-2pc4w 19000
-  ```
-
-  Note - in the above command, you would want to replace the pod name with your service's pod name. 
-
-  2 - From the browser logon to 127.0.0.1:19000 to login to the service's envoy admin interface. 
-
-  Choose the entire config dump (or you can choose to look at specific listeners/clusters depending on your configuration)
-
-  At this point you should just see regular envoy config dump without your changes. 
-
-  NOTE: Curl from the pod is another option to review envoy config dumps but curl is not available on these pods and the browser is easier to view but bottom line you want to look at the envoy config dumps to review changes. 
-
-  3 - Use the following command to apply your property override changes (using the propertyoverride json file is included in this repo or by creating your own accordingly for your application) - 
-
-  ```
-  kubectl apply -f propertyoveride.json
-  ```
-
-  ```
-  servicedefaults.consul.hashicorp.com/public-api created
-  hari@hari-C02FQABCMD6R 1.16 %
-  ```
-
-  4 - Now 'refresh' the localhost browser, search for the property override changes and they should be there. For example, using the example provided, you should now see a keepalive probe with a value of 1234 for the products_api upstream only. You should also see a 'custom.stats.inbound' for listeners portion. 
-
-  5 - You may delete the propertyoverride file and check that it is gone in the localhost browser again (you have to refresh the browser everytime to grab the new data from envoy)
-
-
-
-
----
 
