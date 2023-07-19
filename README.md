@@ -48,7 +48,8 @@ cd EKSonly
 To verify if your EKS deployment is good, you may optionally use the module below to install Consul and confirm. Deploy Consul on Kubernetes cluster
 (NOTE - These optional modules may have additional pre-reqs, warnings, please refer to that module's readme for further info)
 
-# Deploy Consul on Kubernetes cluster 
+# Deploy Consul on Kubernetes cluster
+
 1. Clone this repo
 ```
 git clone https://github.com/ramramhariram/Consul-Envoyextensions-Propertyoverride.git
@@ -63,14 +64,16 @@ cd Consul-Envoyextensions-Propertyoverride
 3. If you have multiple clusters, ensure you are in the current kubernetes cluster context 
 
 
-4. Add Consul Ent license as a K8s secret - 
+4. Add Consul Ent license as a K8s secret, after creating the consul namesapce as well - 
 
 ```
 export CONSUL_LICENSE=<ADD_YOUR_LICENSE_HERE>
 ```
 
 ```
-kubectl create secret generic license --from-literal=key=$CONSUL_LICENSE
+kubectl create namespace consul 
+kubectl create secret generic consul-enterprise-license --from-literal=key=$CONSUL_LICENSE -n consul
+
 ```
 5 - Ensure you have the correct consul-k8s cli version. Or the correct helm repo if using helm. 
   
@@ -144,7 +147,6 @@ kubectl create secret generic license --from-literal=key=$CONSUL_LICENSE
 
   You should be able to login to your UI with this boostrap token to view everything. Now time to set up a few services for our service mesh deployment. 
 
----
 
 # OPTIONAL MODULE 2: Deploy Hashicups and register it with Consul on Kubernetes 
 
