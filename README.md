@@ -1,47 +1,37 @@
-# Repeated EKS automated deployment - This module is for deploying 1 or more EKS clusters automtically using count
-# There are two optional modules referred to herewithin - one is to install Consul on the EKS cluster and another to deploy Hashicups and register it with Consul SM.
+# Repeated EKS automated deployment
+This module is for deploying 1 or more EKS clusters automtically using count
 
-# Pre-reqs 
+# Note: 
+There are two optional modules referred to herewithin - one is to install Consul on the EKS cluster and another to deploy Hashicups and register it with Consul SM.
+
+# Pre-reqs: 
 
 1 - AWS account with admin access (doormat accounts do work) 
+
 2 - Check Provider.tf for AWS provider requirements. 
+
 3 - TF version used - 1.5.3 
+
 4 - EKS version used - Latest by default, although version could be hardcoded in the aws_eks_cluster module. 
 
-# Warnings - The security related resources inside this module may not be production grade, please review and update as needed if using in Production. 
+
+# Warnings: 
+The security related resources inside this module may not be production grade, please review and update as needed if using in Production. 
 
 # To use the module 
 
 1 - Check tfvars files for all the variables, the count variable is the most important as this dictates how many EKS clusters and its associated components will be deployed. 
+
 2 - Locals.tf files has some common tags, update as necessary. 
+
 3 - Once deployed, use the command in 'notes-impcommands' to pull the eks creds into your local kube config. 
 
 
-1 - Atleast one kubernetes Cluster. 
-  
-  Important Note if using EKS - there may be an issue with EKS clusters in latest version (1.27) - where the OIDC provider does not get installed. Use this documentation to ensure or deploy if necessary, prior to deploying Consul - https://docs.aws.amazon.com/eks/latest/userguide/enable-iam-roles-for-service-accounts.html
+# OPTIONAL MODULE 1: 
+To verify if your EKS deployment is good, you may optionally use the module below to install Consul and confirm. Deploy Consul on Kubernetes cluster
+(NOTE - These optional modules may have additional pre-reqs, warnings, please refer to that module's readme for further info)
 
-2 - Consul installation on 1.16 
-  Helm values here deploy 1.16-dev as I have been deploying pre and post Release candidate for 1.16. Use GA components for everything if it is GA at the time of your testing. 
-  
-  It may also have additional parameters you dont necessarily need  - in other words a simpler helm values for installing consul would work as long as you are referencing the correct 'image' and 'imageK8S'
-
-  You can install Consul using consul-k8s or helm. There are plenty of helm examples out there, this repo highlights an example of using consul-k8s. 
-
-  Note - If using helm to install, it is better to also use helm to uninstall. 
-  
-  Consul-k8s is definitely better for uninstall (cleaner in wiping all consul components) so starting with consul-k8s to install is a good idea if you are going to use it to uninstall. 
-  
-  At the time of publishing this repo, combining helm/consul-k8s is not officially supported. Mix them at your own risk. 
-
-3 - You don't need a Consul Enterprise license for this specific demo but you probably want to get one to test out this and all the other ENT only features in 1.16. See other examples at the end of this readme. 
-
-  To request a 30 day trial license: https://www.hashicorp.com/products/consul/trial
-
-# To verify if your EKS deployment is good, you may optionally use the module below to install Consul and confirm. Deploy Consul on Kubernetes cluster
-
-# OPTIONAL: Deploy Consul on Kubernetes cluster (These optional modules may have additional pre-reqs, warnings, please refer to that module's readme for further info)
-
+# Deploy Consul on Kubernetes cluster 
 1. Clone this repo
 ```
 git clone https://github.com/ramramhariram/Consul-Envoyextensions-Propertyoverride.git
@@ -138,11 +128,10 @@ kubectl create secret generic license --from-literal=key=$CONSUL_LICENSE
   You should be able to login to your UI with this boostrap token to view everything. Now time to set up a few services for our service mesh deployment. 
 
 
-# OPTIONAL: Deploy Hashicups and register it with Consul on Kubernetes (These optional modules may have additional pre-reqs, warnings, please refer to that module's readme for further info)
+# OPTIONAL MODULE 2: Deploy Hashicups and register it with Consul on Kubernetes 
 
-  Any demo application with atleast one upstream/downstream pair will do but we use the hashicups application here to showcase the different options that are possible with propertyoverride and other envoy extensions
+(NOTE - These optional modules may have additional pre-reqs, warnings, please refer to that module's readme for further info)
 
-  You are free to use any application but you need to make sure you update the propertyoverride.json file accordingly. 
 
   1 - Clone this repo 
 
