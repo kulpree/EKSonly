@@ -1,8 +1,10 @@
 # Repeated EKS automated deployment
 This module is for deploying 1 or more EKS clusters automtically using count
 
-# Note: 
-There are two optional modules referred to herewithin - one is to install Consul on the EKS cluster and another to deploy Hashicups and register it with Consul SM.
+# Note: There are two optional modules - 
+
+1 - One is to install Consul on the EKS cluster 
+2 - And another to deploy Hashicups and register it with Consul SM.
 
 # Pre-reqs: 
 
@@ -24,8 +26,22 @@ The security related resources inside this module may not be production grade, p
 
 2 - Locals.tf files has some common tags, update as necessary. 
 
-3 - Once deployed, use the command in 'notes-impcommands' to pull the eks creds into your local kube config. 
+3 -  Clone this repo
+```
+git clone https://github.com/ramramhariram/EKSonly.git
+```
 
+4. Nagivate to the correct folder. 
+
+```
+cd EKSonly
+```
+
+5 - Use your method of TF to plan and apply. 
+
+6 - Once deployed, use the command in 'notes-impcommands' to pull the eks creds into your local kube config. 
+
+---
 
 # OPTIONAL MODULE 1: 
 To verify if your EKS deployment is good, you may optionally use the module below to install Consul and confirm. Deploy Consul on Kubernetes cluster
@@ -127,6 +143,7 @@ kubectl create secret generic license --from-literal=key=$CONSUL_LICENSE
 
   You should be able to login to your UI with this boostrap token to view everything. Now time to set up a few services for our service mesh deployment. 
 
+---
 
 # OPTIONAL MODULE 2: Deploy Hashicups and register it with Consul on Kubernetes 
 
