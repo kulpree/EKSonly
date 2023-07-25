@@ -5,7 +5,7 @@ consul_cidr_block1 = "10.66.64.0/18"
 consul_cidr_block2 = "10.66.128.0/18"
 consul_cidr_block3 = "10.66.192.0/18"
 #cluster_name = "TKS" 
-eks_total = 2
+eks_total = 4
 
 
 
