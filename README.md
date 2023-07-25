@@ -1,5 +1,5 @@
 # Repeated EKS automated deployment
-This module is for deploying 1 or more EKS clusters automtically using count
+This module is for deploying 1 or more EKS clusters automatically using count
 
 # Note: There are two optional modules - 
 
